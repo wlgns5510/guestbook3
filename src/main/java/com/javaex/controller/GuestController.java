@@ -2,6 +2,7 @@ package com.javaex.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -9,14 +10,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.javaex.dao.GuestbookDao;
+import com.javaex.service.GuestService;
 import com.javaex.vo.GuestbookVo;
 
 @Controller
 public class GuestController {
 
 	//필드
-	
+	@Autowired
+	private GuestService guestService;
 	//생성자
 		
 	//메소드 gs
@@ -27,17 +29,15 @@ public class GuestController {
 		public String addList(Model model) {
 			System.out.println("GuestController>addList()");
 			
-			//Dao를 통해서 guestList(주소)를 가져온다
-			GuestbookDao guestbookDao = new GuestbookDao();
-			List<GuestbookVo> guestList = guestbookDao.getList();
+			//Service를 통해서 getGuestList(주소)를 가져온다
+			List<GuestbookVo> guestList = guestService.getGuestList();
 			
 			//ds 데이터보내기 --> request attribute에 넣는다
 			model.addAttribute("guestList", guestList);
 			
 			
-			return "/WEB-INF/views/addList.jsp";
+			return "addList";
 		}
-		
 		//등록
 		@RequestMapping(value="/add", method= {RequestMethod.GET, RequestMethod.POST })
 		public String add(@ModelAttribute GuestbookVo guestbookVo) {
@@ -46,20 +46,18 @@ public class GuestController {
 			//파라미터 꺼내기 + Vo로 묶기를 DS해서 메소드의 파라미터로 보내준다
 			
 			//dao로 저장하기
-			GuestbookDao guestbookDao = new GuestbookDao();
-			int count = guestbookDao.insert(guestbookVo);
-			System.out.println(count);
+			int count = guestService.GuestbookInsert(guestbookVo);
 			
 			//리다이렉트
 			return "redirect:/addList";
 		}
-		
+
 		//삭제 폼
 		@RequestMapping(value="/deleteForm", method = {RequestMethod.GET, RequestMethod.POST})
 		public String deleteForm() {
 			System.out.println("guestController>deleteForm()");
 			
-			return "/WEB-INF/views/deleteForm.jsp";
+			return "deleteForm";
 		}
 		
 		//삭제
@@ -77,29 +75,10 @@ public class GuestController {
 			vo.setPassword(password);
 			
 			//Dao로 처리하기(삭제)
-			GuestbookDao dao = new GuestbookDao();
-			dao.delete(vo);
+			guestService.GuestbookDelete(vo);
 			
 			
 			return "redirect:/addList";
 		}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-		//테스트
-		@RequestMapping(value="/test", method= {RequestMethod.GET, RequestMethod.POST })
-		public String test() {
-			System.out.println("GuestController>test()");
-			
-			//다오
-			return "/WEB-INF/views/test.jsp";
-		}
 }
